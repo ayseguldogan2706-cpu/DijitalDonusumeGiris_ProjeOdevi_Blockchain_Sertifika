@@ -1,0 +1,36 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "CertificatePayload",
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string",
+            "description": "UUID/hex (32 bayt)"
+        },
+        "holderHash": {
+            "type": "string",
+            "description": "keccak256 hex (0x...)"
+        },
+        "title": {
+            "type": "string"
+        },
+        "issuer": {
+            "type": "string"
+        },
+        "expiresAt": {
+            "type": "integer",
+            "description": "Unix time; 0=süresiz"
+        },
+        "salt": {
+            "type": "string",
+            "description": "İstemci tarafında rastgele üretilir; saklanır ama zincire yazılmaz."
+        }
+    },
+    "required": [
+        "id",
+        "holderHash",
+        "title",
+        "issuer",
+        "expiresAt"
+    ]
+}

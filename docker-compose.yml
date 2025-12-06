@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+  # 1. The Local Blockchain
+  ganache:
+    image: trufflesuite/ganache:latest
+    # Ports: Exposes port 8545 so our other containers can talk to it
+    ports:
+      - "8545:8545"
+    # Configuration from the assignment: Chain ID 1337, 10 accounts
+    command: [ "--host", "0.0.0.0", "--chain.chainId", "1337", "--wallet.totalAccounts", "10", "--wallet.mnemonic", "test test test test test test test test test test test junk" ]
+    networks:
+      - certnet
+
+  # 2. The Deployer (Hardhat)
+  hardhat:
+    image: node:20
+    working_dir: /app
+    volumes:
+      - ./:/app
+    # Installs deps and runs the deploy script we made
+    command: >
+      bash -c "npm install && npx hardhat run scripts/deploy.js --network ganache && tail -f /dev/null"
+    depends_on:
+      - ganache
+    networks:
+      - certnet
+
+  # 3. The Client App
+  client:
+    image: node:20
+    working_dir: /app/client
+    volumes:
+      - ./client:/app/client
+    # Installs client deps and starts the app (we will build index.js next)
+    command: >
+      bash -c "npm install && node index.js"
+    depends_on:
+      - hardhat
+    environment:
+      RPC_URL: "http://ganache:8545"
+    networks:
+      - certnet
+
+networks:
+  certnet:
+    name: certnet
