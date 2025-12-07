@@ -17,7 +17,7 @@ Proje Docker ve Docker Compose kullanılarak tek komutla çalıştırılabilir.
 2.  **Sistemi Başlatın:** Aşağıdaki komutu çalıştırın:
 
 <!-- end list -->
-
+<!--  -->
 ```bash
 sudo docker-compose up --build
 ```
@@ -51,9 +51,14 @@ Aşağıdaki ekran görüntüleri sistemin uçtan uca çalışmasını gösterme
 ## 🎥 Demo Videosu
 
 Projenin çalışır halini gösteren demo videosuna aşağıdaki bağlantıdan ulaşabilirsiniz:
-*   [Demo Video Linki](https://youtube.com/...)
+*   [Demo Video](demo.mp4) (Video dosyası proje klasöründe mevcuttur)
 
-## 📄 Teknik Rapor
+## � GitHub Deposu
+
+Projenin güncel kaynak kodlarına ve geçmişine aşağıdaki bağlantıdan ulaşabilirsiniz:
+*   [https://github.com/ayseguldogan2706-cpu/DijitalDonusumeGiris_ProjeOdevi_Blockchain_Sertifika](https://github.com/ayseguldogan2706-cpu/DijitalDonusumeGiris_ProjeOdevi_Blockchain_Sertifika)
+
+## �📄 Teknik Rapor
 
 Projenin mimarisi, güvenlik önlemleri ve KVKK uyumluluğu hakkında detaylı bilgi için [REPORT.md](REPORT.md) dosyasına bakınız.
 

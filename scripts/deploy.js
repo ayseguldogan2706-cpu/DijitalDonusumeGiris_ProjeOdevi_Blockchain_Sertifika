@@ -12,7 +12,6 @@ async function main() {
 
     console.log("CertificateRegistry deployed to:", address);
 
-    // --- THIS IS THE CRITICAL PART FOR DOCKER ---
     const addressPath = path.join(__dirname, "../client/contractAddress.txt");
     fs.writeFileSync(addressPath, address);
     console.log("Address saved to:", addressPath);

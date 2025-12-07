@@ -5,7 +5,6 @@ const fs = require("fs");
 const path = require("path");
 
 const RPC_URL = process.env.RPC_URL || "http://127.0.0.1:8545";
-// Account 0 Private Key
 const ISSUER_PRIVATE_KEY = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 
 function getContractAddress() {
@@ -17,13 +16,9 @@ function getContractAddress() {
 async function main() {
     console.log("--- CLIENT STARTED ---");
 
-    // Setup provider first
     const provider = new ethers.JsonRpcProvider(RPC_URL);
     const wallet = new ethers.Wallet(ISSUER_PRIVATE_KEY, provider);
 
-    // 1. Wait for Valid Contract Address
-    // We check for the file AND verify the contract exists on-chain.
-    // If the file exists but the contract code is empty (0x), it means it's from an old chain session.
     let contractAddress = null;
     for (let i = 0; i < 60; i++) {
         const addr = getContractAddress();
@@ -51,35 +46,30 @@ async function main() {
     }
     console.log(`Contract Address: ${contractAddress}`);
 
-    // DEBUG: Check Balance
     const balance = await provider.getBalance(wallet.address);
     console.log(`Wallet Balance: ${ethers.formatEther(balance)} ETH`);
 
     const abi = [
         "function issue(bytes32 id, bytes32 holderHash, string title, string issuer, uint64 expiresAt) external",
-        "function revoke(bytes32 id) external", // <--- THIS LINE IS MISSING IN YOUR FILE!
+        "function revoke(bytes32 id) external",
         "function verify(bytes32 id, bytes32 holderHash) external view returns (bool valid, bool isRevoked, uint64 issuedAt, uint64 expiresAt, string title, string issuer)"
     ];
 
     const contract = new ethers.Contract(contractAddress, abi, wallet);
 
-    // 3. Prepare Data
     const studentName = "Ali Veli";
     const studentNo = "123456";
     const salt = ethers.randomBytes(32).toString('hex');
     const payload = `${studentNo}|${studentName.toUpperCase().trim()}|${salt}`;
     const holderHash = ethers.keccak256(ethers.toUtf8Bytes(payload));
 
-    // Use Date.now() to ensure ID is always unique
     const certId = ethers.id("cert-" + Date.now());
 
     console.log("\n--- ISSUING CERTIFICATE ---");
 
-    // Get current nonce from network (use 'pending' to include unconfirmed txs)
     let currentNonce = await provider.getTransactionCount(wallet.address, "pending");
     console.log("Current Nonce for Issue:", currentNonce);
 
-    // 4. THE FIX: FORCE LEGACY TRANSACTION with explicit nonce
     let overrides = {
         gasLimit: 3000000,
         gasPrice: ethers.parseUnits("20", "gwei"),
@@ -104,10 +94,9 @@ async function main() {
     } catch (err) {
         console.error("CRITICAL ERROR DURING ISSUE:");
         console.error(err);
-        process.exit(1); // Stop here if issue fails
+        process.exit(1);
     }
 
-    // 5. Verify
     console.log("\n--- VERIFYING CERTIFICATE ---");
     try {
         let result = await contract.verify(certId, holderHash);
@@ -119,10 +108,8 @@ async function main() {
             console.log("FAILURE: Certificate invalid.");
         }
 
-        // 6. Revoke
         console.log("\n--- REVOKING CERTIFICATE ---");
 
-        // Manually increment nonce (issue tx used currentNonce, so revoke uses currentNonce + 1)
         currentNonce = currentNonce + 1;
         console.log("Current Nonce for Revoke:", currentNonce);
         overrides.nonce = currentNonce;
@@ -132,7 +119,6 @@ async function main() {
         await revokeTx.wait();
         console.log("SUCCESS: Certificate Revoked.");
 
-        // 7. Verify Again (Should be invalid)
         console.log("\n--- VERIFYING AFTER REVOCATION ---");
         result = await contract.verify(certId, holderHash);
         console.log("Is Valid?", result.valid);
